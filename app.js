@@ -124,11 +124,7 @@ async function handleSendMessage() {
     
     if (!message || state.isProcessing) return;
     
-    if (!CONFIG.GEMINI_API_KEY) {
-        showNotification('⚠️ Configura tu API Key primero', 'warning');
-        showAPIKeyModal();
-        return;
-    }
+   }
     
     // Limpiar input
     userInput.value = '';
@@ -156,8 +152,7 @@ async function handleSendMessage() {
 
 // Enviar mensaje a Gemini Pro
 async function sendToGemini(message) {
-    const url = `${CONFIG.GEMINI_API_URL}?key=${CONFIG.GEMINI_API_KEY}`;
-    
+    const url = CONFIG.GEMINI_API_URL;    
     const requestBody = {
         contents: [{
             parts: [{
