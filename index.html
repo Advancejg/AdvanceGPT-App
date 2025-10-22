@@ -3,12 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AdvanceGPT - AI Assistant</title>
+    <title>AdvanceGPT - Asistente de IA</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .message { animation: fadeIn 0.3s; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .typing { animation: pulse 1.5s infinite; }
+        .animate-slide-in { animation: slideIn 0.3s ease-out; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
     </style>
 </head>
 <body class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 min-h-screen text-white">
@@ -17,139 +19,50 @@
             <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">AdvanceGPT</h1>
             <p class="text-gray-400 mt-2">Asistente de IA impulsado por Gemini Pro</p>
         </header>
-        
+
         <div id="chat-container" class="flex-1 overflow-y-auto space-y-4 mb-4 px-2">
-            <div class="message bg-gray-800/50 p-4 rounded-lg border border-gray-700">
-                <div class="flex items-start gap-3">
-                    <div class="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-sm font-bold">AI</div>
-                    <div class="flex-1">
-                        <p class="text-gray-300">¡Hola! Soy AdvanceGPT, tu asistente de IA personal. ¿En qué puedo ayudarte hoy?</p>
-                    </div>
-                </div>
-            </div>
+            <!-- Los mensajes aparecerán aquí -->
         </div>
-        
+
         <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-3">
             <div class="flex gap-2">
                 <input 
-                    id="user-input" 
-                    type="text" 
-                    placeholder="Escribe tu mensaje aquí..." 
-                    class="flex-1 bg-gray-900 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    onkeypress="if(event.key==='Enter') sendMessage()"
+                    id="user-input"
+                    type="text"
+                    placeholder="Escribe tu mensaje aquí..."
+                    class="flex-1 bg-gray-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <button 
-                    onclick="sendMessage()" 
-                    class="bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-3 rounded-lg hover:opacity-90 transition font-semibold">
+                    id="send-button"
+                    onclick="handleSendMessage()"
+                    class="bg-blue-500 hover:bg-blue-600 px-6 py-3 rounded-lg font-semibold transition"
+                >
                     Enviar
+                </button>
+            </div>
+            <div class="flex gap-2 mt-2">
+                <button 
+                    id="set-api-key"
+                    class="text-sm bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded"
+                >
+                    ⚙️ Configurar API Key
+                </button>
+                <button 
+                    id="clear-chat"
+                    class="text-sm bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded"
+                >
+                    🗑️ Limpiar Chat
+                </button>
+                <button 
+                    id="export-chat"
+                    class="text-sm bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded"
+                >
+                    📥 Exportar
                 </button>
             </div>
         </div>
     </div>
 
-    <script>
-        const API_KEY = 'AIzaSyBVg1M0LZKXf9-7_hVZ7KGpXNJvQ3Xr-8M';
-        const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
-        
-        let conversationHistory = [];
-        
-        async function sendMessage() {
-            const input = document.getElementById('user-input');
-            const message = input.value.trim();
-            
-            if (!message) return;
-            
-            addMessage(message, 'user');
-            input.value = '';
-            
-            conversationHistory.push({ role: 'user', parts: [{ text: message }] });
-            
-            showTypingIndicator();
-            
-            try {
-                const response = await fetch(`${API_URL}?key=${API_KEY}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: conversationHistory
-                    })
-                });
-                
-                const data = await response.json();
-                removeTypingIndicator();
-                
-                if (data.candidates && data.candidates[0]) {
-                    const aiResponse = data.candidates[0].content.parts[0].text;
-                    addMessage(aiResponse, 'ai');
-                    conversationHistory.push({ role: 'model', parts: [{ text: aiResponse }] });
-                } else {
-                    addMessage('Lo siento, ocurrió un error. Por favor intenta de nuevo.', 'ai');
-                }
-            } catch (error) {
-                removeTypingIndicator();
-                addMessage('Error de conexión. Verifica tu API key o conexión a internet.', 'ai');
-                console.error('Error:', error);
-            }
-        }
-        
-        function addMessage(text, sender) {
-            const container = document.getElementById('chat-container');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'message';
-            
-            if (sender === 'user') {
-                messageDiv.innerHTML = `
-                    <div class="flex items-start gap-3 justify-end">
-                        <div class="bg-blue-600 p-4 rounded-lg max-w-2xl">
-                            <p class="text-white">${text}</p>
-                        </div>
-                        <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-sm font-bold">TÚ</div>
-                    </div>
-                `;
-            } else {
-                messageDiv.innerHTML = `
-                    <div class="bg-gray-800/50 p-4 rounded-lg border border-gray-700">
-                        <div class="flex items-start gap-3">
-                            <div class="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-sm font-bold">AI</div>
-                            <div class="flex-1">
-                                <p class="text-gray-300">${text.replace(/\n/g, '<br>')}</p>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-            
-            container.appendChild(messageDiv);
-            container.scrollTop = container.scrollHeight;
-        }
-        
-        function showTypingIndicator() {
-            const container = document.getElementById('chat-container');
-            const typingDiv = document.createElement('div');
-            typingDiv.id = 'typing-indicator';
-            typingDiv.className = 'message typing';
-            typingDiv.innerHTML = `
-                <div class="bg-gray-800/50 p-4 rounded-lg border border-gray-700">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-sm font-bold">AI</div>
-                        <div class="flex gap-1">
-                            <div class="w-2 h-2 bg-gray-500 rounded-full animate-bounce"></div>
-                            <div class="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
-                            <div class="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style="animation-delay: 0.4s"></div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            container.appendChild(typingDiv);
-            container.scrollTop = container.scrollHeight;
-        }
-        
-        function removeTypingIndicator() {
-            const indicator = document.getElementById('typing-indicator');
-            if (indicator) indicator.remove();
-        }
-        
-        document.getElementById('user-input').focus();
-    </script>
+    <script src="aplicación.js"></script>
 </body>
 </html>
