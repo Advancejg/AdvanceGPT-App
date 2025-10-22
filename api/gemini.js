@@ -1,4 +1,4 @@
-// Vercel Serverless Function para manejar peticiones a Gemini Pro
+// Vercel Serverless Function para manejar peticiones a Gemini P ro
 // Esta función actúa como proxy seguro para ocultar la API key
 
 export default async function handler(req, res) {
