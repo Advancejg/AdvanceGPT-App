@@ -3,8 +3,7 @@
 
 const CONFIG = {
     GEMINI_API_KEY: '', // El usuario debe agregar su API key
-    GEMINI_API_URL: '/api/gemini'
-    ,    MAX_HISTORY: 50,
+    GEMINI_API_URL: '/api/chat',    ,    MAX_HISTORY: 50,
     STORAGE_KEY: 'advancegpt_chat_history',
     SETTINGS_KEY: 'advancegpt_settings'
 };
